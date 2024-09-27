@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parkinson's Disease MRI image classificaton using CNN</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    body {
+      background-image: url({{img}});
+    }
+    .container {
+      margin-top: 20px;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .nav-link {
+      cursor: pointer;
+    }
+    .content-section {
+      display: none;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      transition: width 0.6s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4" style="color:rgb(127, 6, 6);font:28px">Parkinson's Disease Prediction</h1>
+
+    
+    <div id="predictSection" class="content-section">
+
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Upload Image</h5>
+              <div class="form-group">
+                <input type="file" class="form-control-file" id="fileInput">
+              </div>
+              <button type="button" class="btn btn-primary" onclick="predict()">Predict</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="selectedImageContainer" class="mt-4 text-center" style="display: none;">
+        <h5>Selected Image:</h5>
+        <img id="selectedImage" src="" class="img-fluid" width="200" height="110" alt="Selected Image">
+      </div>
+      <div id="predictionResult" class="mt-6" style="display: none;">
+        <h5 class="mt-4 text-center">Prediction Result:</h5>
+        <p id="predictionText" class="mt-6 text-center">{{ prediction }}</p>
+      </div>
+    </div>
+    
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <script>
+    
+
+    function showSection(sectionId) {
+      var sections = document.getElementsByClassName('content-section');
+      for (var i = 0; i < sections.length; i++) {
+        sections[i].style.display = 'none';
+      }
+      document.getElementById(sectionId).style.display = 'block';
+      var navLinks = document.getElementsByClassName('nav-link');
+      for (var i = 0; i < navLinks.length; i++) {
+        navLinks[i].classList.remove('active');
+      }
+      event.target.classList.add('active');
+    }
+
+    function predict() 
+    {
+      console.log("clicked")
+      var fileInput = document.getElementById('fileInput');
+      var file = fileInput.files[0];
+
+      if (file) 
+      {
+        var formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/predict', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+          displayResult(result,file);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      } 
+      else 
+      {
+        alert('Please select an image.');
+      }
+    }
+    function displayResult(result,file)
+     {
+      var selectedImageContainer = document.getElementById('selectedImageContainer');
+      selectedImageContainer.style.display = 'block';
+      var selectedImage = document.getElementById('selectedImage');
+      selectedImage.src = URL.createObjectURL(file);
+      var predictionResult = document.getElementById('predictionResult');
+      predictionResult.style.display = 'block';
+      var predictionText = document.getElementById('predictionText');
+      predictionText.textContent = 'Prediction Result: ' + result.Prediction;
+      console.log(result)
+      document.getElementsByClassName('form-group').style.display='none'
+    }
+
+    showSection('predictSection');
+  </script>
+</body>
+</html>
